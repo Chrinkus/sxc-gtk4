@@ -3,6 +3,7 @@ set(tutorial_sources
 	"example-1.c"
 	"example-2.c"
 	"example-3.c"
+	"example-4.c"
 )
 
 foreach(file ${tutorial_sources})
