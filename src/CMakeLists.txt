@@ -11,3 +11,6 @@ foreach(file ${tutorial_sources})
 	add_executable(${exe_name} ${file})
 	target_link_libraries(${exe_name} PRIVATE ${GTK_LIBRARIES})
 endforeach()
+
+add_subdirectory(example-5)
+

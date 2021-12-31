@@ -7,6 +7,8 @@ set(CMAKE_C_STANDARD 99)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(GTK REQUIRED gtk4)
 include_directories(${GTK_INCLUDE_DIRS})
+link_directories(${GTK_LIBRARY_DIRS})
+add_definitions(${GTK_CFLAGS_OTHER})
 
 add_subdirectory(src)
 
