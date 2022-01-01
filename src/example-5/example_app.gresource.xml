@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gresources>
+	<gresource prefix="/home/chrinkus/Repos/sxc-gtk4/src/example-5">
+		<!-- Needed to install libxml2-utils for this: -->
+		<file preprocess="xml-stripblanks">window.ui</file>
+	</gresource>
+</gresources>
+
