@@ -12,6 +12,41 @@ static void example_app_init(ExampleApp* app)
 	// Nothing yet..
 }
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+// gear-menu actions
+
+static void preferences_activated(GSimpleAction* action, GVariant* parameter,
+		gpointer app)
+{
+	// Nothing yet..
+}
+
+static void quit_activated(GSimpleAction* action, GVariant* parameter,
+		gpointer app)
+{
+	g_application_quit(G_APPLICATION(app));
+}
+
+static GActionEntry app_entries[] = {
+	{ "preferences", preferences_activated, NULL, NULL, NULL },
+	{ "quit", quit_activated, NULL, NULL, NULL }
+};
+
+static void example_app_startup(GApplication* app)
+{
+	const char* quit_accels[2] = { "<Ctrl>Q", NULL };
+
+	G_APPLICATION_CLASS(example_app_parent_class)->startup(app);
+
+	g_action_map_add_action_entries(G_ACTION_MAP(app),
+			app_entries, G_N_ELEMENTS(app_entries),
+			app);
+	gtk_application_set_accels_for_action(GTK_APPLICATION(app), "app.quit",
+			quit_accels);
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+
 static void example_app_activate(GApplication* app)
 {
 	ExampleAppWindow* win = example_app_window_new(EXAMPLE_APP(app));
@@ -37,6 +72,7 @@ static void example_app_open(GApplication* app, GFile** files, int num_files,
 
 static void example_app_class_init(ExampleAppClass* class)
 {
+	G_APPLICATION_CLASS(class)->startup = example_app_startup;
 	G_APPLICATION_CLASS(class)->activate = example_app_activate;
 	G_APPLICATION_CLASS(class)->open = example_app_open;
 }

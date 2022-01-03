@@ -11,6 +11,11 @@
 						<property name="stack">stack</property>
 					</object>
 				</child>
+				<child type="end">
+					<object class="GtkMenuButton" id="gears">
+						<property name="direction">none</property>
+					</object>
+				</child>
 			</object>
 		</child>
 		<child>

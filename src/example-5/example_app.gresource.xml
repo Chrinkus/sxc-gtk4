@@ -3,6 +3,7 @@
 	<gresource prefix="/org/gtk/exampleapp">
 		<!-- Needed to install libxml2-utils for this: -->
 		<file preprocess="xml-stripblanks">window.ui</file>
+		<file preprocess="xml-stripblanks">gears-menu.ui</file>
 	</gresource>
 </gresources>
 

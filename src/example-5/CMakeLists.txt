@@ -6,21 +6,19 @@ find_program(GLIB_COMPILE_RESOURCES NAMES glib-compile-resources REQUIRED)
 set(GRESOURCE_OUT resources.c)
 set(GRESOURCE_XML example_app.gresource.xml)
 
-message("Resource file: ${GRESOURCE_OUT}")
-
 add_custom_command(
 	OUTPUT			${GRESOURCE_OUT}
 	WORKING_DIRECTORY	${CMAKE_CURRENT_SOURCE_DIR}
 	COMMAND			${GLIB_COMPILE_RESOURCES}
 	ARGS
 		${GRESOURCE_XML}
-		#--target=${GRESOURCE_OUT}
 		--target=${CMAKE_CURRENT_BINARY_DIR}/${GRESOURCE_OUT}
 		--generate-source
 	VERBATIM
 	MAIN_DEPENDENCY		${GRESOURCE_XML}
 	DEPENDS
 		window.ui
+		gears-menu.ui
 )
 
 # Application target
