@@ -16,7 +16,7 @@ static void example_app_window_init(ExampleAppWindow* win)
 static void example_app_window_class_init(ExampleAppWindowClass* class)
 {
 	gtk_widget_class_set_template_from_resource(GTK_WIDGET_CLASS(class),
-			"/home/chrinkus/Repos/sxc-gtk4/src/example-5/window.ui");
+			"/org/gtk/exampleapp/window.ui");
 }
 
 ExampleAppWindow* example_app_window_new(ExampleApp* app)
