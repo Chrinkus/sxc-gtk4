@@ -1,5 +1,6 @@
 #include "example_app.h"
 #include "example_app_win.h"
+#include "example_app_prefs.h"
 
 struct _ExampleApp {
 	GtkApplication parent;
@@ -18,7 +19,12 @@ static void example_app_init(ExampleApp* app)
 static void preferences_activated(GSimpleAction* action, GVariant* parameter,
 		gpointer app)
 {
-	// Nothing yet..
+	GtkWindow* win;
+	ExampleAppPrefs* prefs;
+
+	win = gtk_application_get_active_window(GTK_APPLICATION(app));
+	prefs = example_app_prefs_new(EXAMPLE_APP_WINDOW(win));
+	gtk_window_present(GTK_WINDOW(prefs));
 }
 
 static void quit_activated(GSimpleAction* action, GVariant* parameter,
@@ -80,10 +86,8 @@ static void example_app_class_init(ExampleAppClass* class)
 ExampleApp* example_app_new(void)
 {
 	return g_object_new(EXAMPLE_APP_TYPE,
-			"application-id",
-			"org.gtk.exampleapp",
-			"flags",
-			G_APPLICATION_HANDLES_OPEN,
+			"application-id", "org.gtk.exampleapp",
+			"flags", G_APPLICATION_HANDLES_OPEN,
 			NULL);
 }
 

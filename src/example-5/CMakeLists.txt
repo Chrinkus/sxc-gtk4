@@ -19,6 +19,7 @@ add_custom_command(
 	DEPENDS
 		window.ui
 		gears-menu.ui
+		prefs.ui
 )
 
 # Application target
@@ -26,6 +27,7 @@ add_executable(example-5
 	main.c
 	example_app.c
 	example_app_win.c
+	example_app_prefs.c
 	${GRESOURCE_OUT}
 )
 
