@@ -3,6 +3,8 @@
 
 struct _ExampleAppWindow {
 	GtkApplicationWindow parent;
+
+	GSettings* settings;
 	GtkWidget* stack;
 	GtkWidget* gears;
 };
@@ -13,6 +15,12 @@ G_DEFINE_TYPE(ExampleAppWindow, example_app_window,
 static void example_app_window_init(ExampleAppWindow* win)
 {
 	gtk_widget_init_template(GTK_WIDGET(win));
+
+	win->settings = g_settings_new("org.gtk.exampleapp");
+
+	g_settings_bind(win->settings, "transition",
+			win->stack, "transition-type",
+			G_SETTINGS_BIND_DEFAULT);
 
 	GtkBuilder* builder = gtk_builder_new_from_resource(
 			"/org/gtk/exampleapp/gears-menu.ui");
