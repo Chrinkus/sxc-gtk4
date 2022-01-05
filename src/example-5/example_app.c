@@ -1,3 +1,5 @@
+#include <gtk/gtk.h>
+
 #include "example_app.h"
 #include "example_app_win.h"
 #include "example_app_prefs.h"
