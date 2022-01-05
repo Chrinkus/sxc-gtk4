@@ -14,6 +14,8 @@ struct _ExampleAppWindow {
 	GtkWidget* searchentry;
 	GtkWidget* sidebar;
 	GtkWidget* words;
+	GtkWidget* lines;
+	GtkWidget* lines_label;
 };
 
 G_DEFINE_TYPE(ExampleAppWindow, example_app_window,
@@ -101,6 +103,22 @@ done:
 	g_hash_table_unref(strings);
 }
 
+static void update_lines(ExampleAppWindow* win)
+{
+	GtkWidget* tab = gtk_stack_get_visible_child(GTK_STACK(win->stack));
+	if (!tab)
+		return;
+
+	GtkWidget* view = gtk_scrolled_window_get_child(
+			GTK_SCROLLED_WINDOW(tab));
+	GtkTextBuffer* buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(view));
+
+	int count = gtk_text_buffer_get_line_count(buffer);
+	char* lines = g_strdup_printf("%d", count);
+	gtk_label_set_text(GTK_LABEL(win->lines), lines);
+	g_free(lines);
+}
+
 static void visible_child_changed(GObject* stack, GParamSpec* pspec,
 		ExampleAppWindow* win)
 {
@@ -108,6 +126,7 @@ static void visible_child_changed(GObject* stack, GParamSpec* pspec,
 		return;
 	gtk_search_bar_set_search_mode(GTK_SEARCH_BAR(win->searchbar), FALSE);
 	update_words(win);
+	update_lines(win);
 }
 
 static void words_changed(GObject* sidebar, GParamSpec* pspec,
@@ -147,6 +166,15 @@ static void example_app_window_init(ExampleAppWindow* win)
 	GAction* action = g_settings_create_action(win->settings, "show-words");
 	g_action_map_add_action(G_ACTION_MAP(win), action);
 	g_object_unref(action);
+
+	action = (GAction*)g_property_action_new("show-lines", win->lines,
+			"visible");
+	g_action_map_add_action(G_ACTION_MAP(win), action);
+	g_object_unref(action);
+
+	g_object_bind_property(win->lines, "visible",
+			win->lines_label, "visible",
+			G_BINDING_DEFAULT);
 }
 
 static void example_app_window_dispose(GObject* object)
@@ -179,6 +207,10 @@ static void example_app_window_class_init(ExampleAppWindowClass* class)
 			ExampleAppWindow, words);
 	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(class),
 			ExampleAppWindow, sidebar);
+	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(class),
+			ExampleAppWindow, lines);
+	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(class),
+			ExampleAppWindow, lines_label);
 
 	gtk_widget_class_bind_template_callback(GTK_WIDGET_CLASS(class),
 			search_text_changed);
@@ -229,5 +261,6 @@ void example_app_window_open(ExampleAppWindow* win, GFile* file)
 	gtk_widget_set_sensitive(win->search, TRUE);
 
 	update_words(win);
+	update_lines(win);
 }
 
