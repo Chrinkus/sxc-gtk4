@@ -22,6 +22,11 @@ add_custom_command(
 		prefs.ui
 )
 
+execute_process(COMMAND glib-compile-schemas
+				--targetdir=${CMAKE_BINARY_DIR}
+				${CMAKE_CURRENT_SOURCE_DIR}
+)
+
 # Application target
 add_executable(example-5
 	main.c
