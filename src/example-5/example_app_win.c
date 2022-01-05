@@ -11,6 +11,9 @@ struct _ExampleAppWindow {
 	GtkWidget* gears;
 	GtkWidget* search;
 	GtkWidget* searchbar;
+	GtkWidget* searchentry;
+	GtkWidget* sidebar;
+	GtkWidget* words;
 };
 
 G_DEFINE_TYPE(ExampleAppWindow, example_app_window,
@@ -43,12 +46,74 @@ static void search_text_changed(GtkEntry* entry, ExampleAppWindow* win)
 	}
 }
 
+static void find_word(GtkButton* button, ExampleAppWindow* win)
+{
+	const char* word = gtk_button_get_label(button);
+	gtk_editable_set_text(GTK_EDITABLE(win->searchentry), word);
+}
+
+static void update_words(ExampleAppWindow* win)
+{
+	GtkWidget* tab = gtk_stack_get_visible_child(GTK_STACK(win->stack));
+	if (!tab)
+		return;
+
+	GtkWidget* view = gtk_scrolled_window_get_child(
+			GTK_SCROLLED_WINDOW(tab));
+	GtkTextBuffer* buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(view));
+
+	GHashTable* strings = g_hash_table_new_full(g_str_hash, g_str_equal,
+			g_free, NULL);
+
+	GtkTextIter start, end;
+	gtk_text_buffer_get_start_iter(buffer, &start);
+
+	while (!gtk_text_iter_is_end(&start)) {
+		// Get iter to next word or jump out if EOF
+		while (!gtk_text_iter_starts_word(&start))
+			if (!gtk_text_iter_forward_char(&start))
+				goto done;
+		// Set end to start and advance till end of word or file
+		end = start;
+		if (!gtk_text_iter_forward_word_end(&end))
+			goto done;
+		char* word = gtk_text_buffer_get_text(buffer, &start, &end,
+				FALSE);
+		g_hash_table_add(strings, g_utf8_strdown(word, -1));
+		g_free(word);
+		start = end;
+	}
+
+done:
+	for (GtkWidget* child;
+			(child = gtk_widget_get_first_child(win->words)); )
+		gtk_list_box_remove(GTK_LIST_BOX(win->words), child);
+
+	GHashTableIter iter;
+	g_hash_table_iter_init(&iter, strings);
+
+	for (char* key; g_hash_table_iter_next(&iter, (gpointer*)&key, NULL);) {
+		GtkWidget* row = gtk_button_new_with_label(key);
+		g_signal_connect(row, "clicked", G_CALLBACK(find_word), win);
+		gtk_list_box_insert(GTK_LIST_BOX(win->words), row, -1);
+	}
+
+	g_hash_table_unref(strings);
+}
+
 static void visible_child_changed(GObject* stack, GParamSpec* pspec,
 		ExampleAppWindow* win)
 {
 	if (gtk_widget_in_destruction(GTK_WIDGET(stack)))
 		return;
 	gtk_search_bar_set_search_mode(GTK_SEARCH_BAR(win->searchbar), FALSE);
+	update_words(win);
+}
+
+static void words_changed(GObject* sidebar, GParamSpec* pspec,
+		ExampleAppWindow* win)
+{
+	update_words(win);
 }
 
 static void example_app_window_init(ExampleAppWindow* win)
@@ -68,9 +133,20 @@ static void example_app_window_init(ExampleAppWindow* win)
 			win->stack, "transition-type",
 			G_SETTINGS_BIND_DEFAULT);
 
+	g_settings_bind(win->settings, "show-words",
+			win->sidebar, "reveal-child",
+			G_SETTINGS_BIND_DEFAULT);
+
 	g_object_bind_property(win->search, "active",
 			win->searchbar, "search-mode-enabled",
 			G_BINDING_BIDIRECTIONAL);
+
+	g_signal_connect(win->sidebar, "notify::reveal-child",
+			G_CALLBACK(words_changed), win);
+
+	GAction* action = g_settings_create_action(win->settings, "show-words");
+	g_action_map_add_action(G_ACTION_MAP(win), action);
+	g_object_unref(action);
 }
 
 static void example_app_window_dispose(GObject* object)
@@ -97,6 +173,12 @@ static void example_app_window_class_init(ExampleAppWindowClass* class)
 			ExampleAppWindow, search);
 	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(class),
 			ExampleAppWindow, searchbar);
+	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(class),
+			ExampleAppWindow, searchentry);
+	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(class),
+			ExampleAppWindow, words);
+	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(class),
+			ExampleAppWindow, sidebar);
 
 	gtk_widget_class_bind_template_callback(GTK_WIDGET_CLASS(class),
 			search_text_changed);
@@ -145,5 +227,7 @@ void example_app_window_open(ExampleAppWindow* win, GFile* file)
 	g_free(basename);
 
 	gtk_widget_set_sensitive(win->search, TRUE);
+
+	update_words(win);
 }
 

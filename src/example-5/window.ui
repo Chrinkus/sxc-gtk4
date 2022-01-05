@@ -39,10 +39,29 @@
 					</object>
 				</child>
 				<child>
-					<object class="GtkStack" id="stack">
-						<signal
-							name="notify::visible-child"
-							handler="visible_child_changed"/>
+					<object class="GtkBox" id="hbox">
+						<child>
+							<object class="GtkRevealer" id="sidebar">
+								<property name="transition-type">slide-right</property>
+								<child>
+									<object class="GtkScrolledWindow" id="sidebar-sw">
+										<property name="hscrollbar-policy">never</property>
+										<child>
+											<object class="GtkListBox" id="words">
+												<property name="selection-mode">none</property>
+											</object>
+										</child>
+									</object>
+								</child>
+							</object>
+						</child>
+						<child>
+							<object class="GtkStack" id="stack">
+								<signal
+									name="notify::visible-child"
+									handler="visible_child_changed"/>
+							</object>
+						</child>
 					</object>
 				</child>
 			</object>
